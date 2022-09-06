@@ -10,15 +10,15 @@ use Illuminate\Notifications\Notification;
 class OffersNotification extends Notification
 {
     use Queueable;
-
+    private $offerData;
     /**
      * Create a new notification instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct($offerData)
     {
-        //
+        $this->offerData = $offerData;
     }
 
     /**
@@ -29,7 +29,7 @@ class OffersNotification extends Notification
      */
     public function via($notifiable)
     {
-        return ['mail'];
+        return ['mail','database'];
     }
 
     /**
@@ -41,9 +41,10 @@ class OffersNotification extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-                    ->line('The introduction to the notification.')
-                    ->action('Notification Action', url('/'))
-                    ->line('Thank you for using our application!');
+            ->name($this->offerData['name'])
+            ->line($this->offerData['body'])
+            ->action($this->offerData['offerText'], $this->offerData['offerUrl'])
+            ->line($this->offerData['thanks']);
     }
 
     /**
@@ -55,7 +56,7 @@ class OffersNotification extends Notification
     public function toArray($notifiable)
     {
         return [
-            //
+            'offer_id' => $this->offerData['offer_id']
         ];
     }
 }
